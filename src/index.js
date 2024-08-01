@@ -4,13 +4,17 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { StyledEngineProvider } from '@mui/material/styles';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import 'dayjs/locale/en-gb'; // Import the en-gb locale
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <StyledEngineProvider injectFirst>
-
-      <App />
+      <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="en-gb">
+        <App />
+      </LocalizationProvider>
     </StyledEngineProvider>
   </React.StrictMode>
 );

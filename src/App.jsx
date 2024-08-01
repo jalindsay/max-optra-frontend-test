@@ -1,6 +1,9 @@
 import './App.css';
 import {useEffect, useState} from "react";
-import {Box, Card, CardContent, Typography, TextField} from "@mui/material";
+import { Box, Card, CardContent, Typography, TextField } from "@mui/material";
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 
 // Generate a random unix time between now and the past 2 years
 const getRandomUnixTime = () => {
@@ -13,10 +16,11 @@ const generateInitialOrders = () => {
     if (i % 100 === 0) {
       console.log(`generating order ${i}`)
     }
-    let startTime1 = getRandomUnixTime();
-    let endTime1 = getRandomUnixTime();
-    let startTime2 = getRandomUnixTime();
-    let endTime2 = getRandomUnixTime();
+    // Using a random starting timestamp then set hour intervals for testing times
+    let startTime1 = getRandomUnixTime(); // Random timestamp between now and the past 2 years
+    let endTime1 = startTime1 + 3600; // 1 hour later
+    let startTime2 = startTime1 + 18000; // 5 hours later
+    let endTime2  = startTime2 + 3600; // 6 hours later
     let order = {
       id: i,
       name: `Test Order ${i}`,
@@ -49,6 +53,8 @@ function App() {
   const [orders, setOrders] = useState(initialOrders);
   const [searchQuery, setSearchQuery] = useState("");
   const [visibleOrders, setVisibleOrders] = useState(10);
+  const [startTimeFilter, setStartTimeFilter] = useState();
+  const [endTimeFilter, setEndTimeFilter] = useState();
 
   const loadMoreOrders = () => {
     setVisibleOrders((prevVisibleOrders) => prevVisibleOrders + 10);
@@ -70,10 +76,34 @@ function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const filteredOrders = orders.filter(order =>
-      order.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredOrders = orders.filter(order => {
+    const orderStartTime1 = order.dropWindows[0].startTime;
+    const orderEndTime1 = order.dropWindows[0].endTime;
+    const orderStartTime2 = order.dropWindows[1].startTime;
+    const orderEndTime2 = order.dropWindows[1].endTime;
 
+    const startTimeMatch = startTimeFilter ? (
+        orderStartTime1 >= new Date(startTimeFilter).getTime() / 1000 ||
+        orderEndTime1 >= new Date(startTimeFilter).getTime() / 1000 ||
+        orderStartTime2 >= new Date(startTimeFilter).getTime() / 1000 ||
+        orderEndTime2 >= new Date(startTimeFilter).getTime() / 1000
+    ) : true;
+
+    const endTimeMatch = endTimeFilter ? (
+        orderStartTime1 <= new Date(endTimeFilter).getTime() / 1000 ||
+        orderEndTime1 <= new Date(endTimeFilter).getTime() / 1000 ||
+        orderStartTime2 <= new Date(endTimeFilter).getTime() / 1000 ||
+        orderEndTime2 <= new Date(endTimeFilter).getTime() / 1000
+    ) : true;
+
+    return order.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        startTimeMatch &&
+        endTimeMatch;
+  });
+
+  // TODO: add generated addresses
+  // TODO: make date filters start from beginning of day and end of day
+  // TODO: format drop windows to only display ending time. (01/01/2020 10:00-11:00)
   return (
     <div className="App">
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -82,6 +112,19 @@ function App() {
             variant="outlined"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            sx={{ marginBottom: 2, marginTop: 2 }}
+        />
+        <DatePicker
+            label="Start Date"
+            inputFormat="dd-mm-yyyy"
+            value={startTimeFilter}
+            onChange={(newValue) => setStartTimeFilter(newValue)}
+            sx={{ marginBottom: 2 }}
+        />
+        <DatePicker
+            label="End Date"
+            value={endTimeFilter}
+            onChange={(newValue) => setEndTimeFilter(newValue)}
             sx={{ marginBottom: 2 }}
         />
         { filteredOrders.slice(0, visibleOrders)?.map((order) => (
@@ -93,6 +136,8 @@ function App() {
               <Typography sx={{ mb: 1.5 }} color="text.secondary">{order.location.address}</Typography>
               <div>
                 <Typography sx={{ mb: 1.5 }} color="text.primary">{new Date(order.dropWindows[0].startTime * 1000).toLocaleString()}</Typography>
+                <Typography sx={{ mb: 1.5 }} color="text.primary">{new Date(order.dropWindows[0].endTime * 1000).toLocaleString()}</Typography>
+                <Typography sx={{ mb: 1.5 }} color="text.primary">{new Date(order.dropWindows[1].startTime * 1000).toLocaleString()}</Typography>
                 <Typography sx={{ mb: 1.5 }} color="text.primary">{new Date(order.dropWindows[1].endTime * 1000).toLocaleString()}</Typography>
               </div>
 
