@@ -28,9 +28,9 @@ const generateInitialOrders = () => {
 
     let order = {
       id: i,
-      name: `Test Order ${i} ${fakerator.names.lastName()}`,
+      name: `Test Order ${i}: ${fakerator.names.lastName()}`,
       location: {
-        name: `Test Location ${i} ${fakerator.address.city()}`,
+        name: `Test Location ${i}: ${fakerator.address.city()}`,
         longitude: fakerator.address.geoLocation().longitude,
         latitude: fakerator.address.geoLocation().longitude,
         address: address
@@ -107,44 +107,43 @@ function App() {
         endTimeMatch;
   });
 
-  // TODO: format drop windows to only display ending time. (01/01/2020 10:00-11:00)
-  // TODO: make card column fixed width
   // TODO: DatePicker state controll warning
   return (
     <div className="App">
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '350px' }}>
         <TextField
             label="Search Orders"
             variant="outlined"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{ marginBottom: 2, marginTop: 2 }}
+            sx={{ marginBottom: 2, marginTop: 2, width: '350px', marginLeft: 2}}
         />
         <DatePicker
             label="Start Date"
-            inputFormat="dd-mm-yyyy"
             value={startTimeFilter}
             onChange={(newValue) => setStartTimeFilter(newValue)}
-            sx={{ marginBottom: 2 }}
+            sx={{ marginBottom: 2, width: '350px', marginLeft: 2}}
         />
         <DatePicker
             label="End Date"
             value={endTimeFilter}
             onChange={(newValue) => setEndTimeFilter(newValue)}
-            sx={{ marginBottom: 2 }}
+            sx={{ marginBottom: 2, width: '350px', marginLeft: 2}}
         />
         { filteredOrders.slice(0, visibleOrders)?.map((order) => (
-            <Box sx={{ minWidth: 275, marginBottom: 2  }} key={order.id}>
+            <Box sx={{ minWidth: 275, marginBottom: 2, marginLeft: 2 }} key={order.id}>
             <Card variant="outlined">
             <CardContent>
-              <Typography variant="h5" component="div">{order.name}</Typography>
+              <Typography variant="h5" component="div" color={'blue'}>{order.name}</Typography>
               <Typography sx={{ mb: 1.5 }} color="text.secondary">{order.location.name}</Typography>
               <Typography sx={{ mb: 1.5 }} color="text.secondary">{order.location.address}</Typography>
               <div>
-                <Typography sx={{ mb: 1.5 }} color="text.primary">{new Date(order.dropWindows[0].startTime * 1000).toLocaleString()}</Typography>
-                <Typography sx={{ mb: 1.5 }} color="text.primary">{new Date(order.dropWindows[0].endTime * 1000).toLocaleString()}</Typography>
-                <Typography sx={{ mb: 1.5 }} color="text.primary">{new Date(order.dropWindows[1].startTime * 1000).toLocaleString()}</Typography>
-                <Typography sx={{ mb: 1.5 }} color="text.primary">{new Date(order.dropWindows[1].endTime * 1000).toLocaleString()}</Typography>
+                <Typography sx={{ mb: 1.5 }} color="text.primary">
+                  Drop Window 1: {new Date(order.dropWindows[0].startTime * 1000).toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}-{new Date(order.dropWindows[0].endTime * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Typography>
+                <Typography sx={{ mb: 1.5 }} color="text.primary">
+                  Drop Window 2: {new Date(order.dropWindows[1].startTime * 1000).toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}-{new Date(order.dropWindows[0].endTime * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </Typography>
               </div>
 
             </CardContent>
