@@ -12,12 +12,11 @@ const getRandomUnixTime = () => {
   return Math.floor((Math.random() * (1722474088 - 1659311997)) + 1659311997)
 };
 
+// Generates all 5000 of the initial orders
+// Uses the package 'fakerator' to generate random names and addresses
 const generateInitialOrders = () => {
   let initialOrders = []
   for (let i = 1; i <= 5000; i++) {
-    if (i % 100 === 0) {
-      console.log(`generating order ${i}`)
-    }
     // Using a random starting timestamp then set hour intervals for testing times
     let startTime1 = getRandomUnixTime(); // Random timestamp between now and 2 years ago
     let endTime1 = startTime1 + 3600; // 1 hour later
@@ -48,11 +47,14 @@ const generateInitialOrders = () => {
     }
     initialOrders.push(order)
   }
+  console.log('orders generated')
   return initialOrders
 }
 
 const initialOrders = generateInitialOrders();
 
+// Main App component
+// TODO: Add dedicated button to toggle time filter
 function App() {
 
   const [orders, setOrders] = useState(initialOrders);
@@ -65,6 +67,8 @@ function App() {
     setVisibleOrders((prevVisibleOrders) => prevVisibleOrders + 10);
   };
 
+  // Checks if the user has scrolled to the bottom of the page
+  // if so, load 10 more orders
   const handleScroll = () => {
     console.log('scrolling')
     if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) {
@@ -76,6 +80,8 @@ function App() {
     };
   };
 
+  // Addes event listener to window to check for scrolling
+  // return fucntion removes event listener when component is unmounted
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -120,13 +126,13 @@ function App() {
         />
         <DatePicker
             label="Start Date"
-            value={startTimeFilter}
+            value={startTimeFilter ?? null}
             onChange={(newValue) => setStartTimeFilter(newValue)}
             sx={{ marginBottom: 2, width: '350px', marginLeft: 2}}
         />
         <DatePicker
             label="End Date"
-            value={endTimeFilter}
+            value={endTimeFilter ?? null}
             onChange={(newValue) => setEndTimeFilter(newValue)}
             sx={{ marginBottom: 2, width: '350px', marginLeft: 2}}
         />
